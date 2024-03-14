@@ -1,0 +1,150 @@
+import math
+
+def evaluate(board):
+    """
+    This function evaluates the current state of the board and returns a score.
+    It returns +1 if the computer wins, -1 if the opponent wins, and 0 if it's a tie.
+    """
+    for row in board:
+        if row.count('X') == 3:
+            return 1
+        elif row.count('O') == 3:
+            return -1
+
+    for col in range(3):
+        if board[0][col] == board[1][col] == board[2][col] == 'X':
+            return 1
+        elif board[0][col] == board[1][col] == board[2][col] == 'O':
+            return -1
+
+    if board[0][0] == board[1][1] == board[2][2] == 'X' or \
+            board[0][2] == board[1][1] == board[2][0] == 'X':
+        return 1
+    elif board[0][0] == board[1][1] == board[2][2] == 'O' or \
+            board[0][2] == board[1][1] == board[2][0] == 'O':
+        return -1
+
+    for row in board:
+        if any([x == '-' for x in row]):
+            return None
+
+    return 0
+
+def minimax(board, depth, isMaximizing):
+    """
+    The Minimax algorithm recursively searches the game tree to find the best move for the current player.
+    """
+    score = evaluate(board)
+
+    if score is not None:
+        return score
+
+    if isMaximizing:
+        best = -math.inf
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == '-':
+                    board[i][j] = 'X'
+                    best = max(best, minimax(board, depth + 1, False))
+                    board[i][j] = '-'
+        return best
+    else:
+        best = math.inf
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == '-':
+                    board[i][j] = 'O'
+                    best = min(best, minimax(board, depth + 1, True))
+                    board[i][j] = '-'
+        return best
+
+def findBestMove(board):
+    """
+    This function returns the best move for the computer using the Minimax algorithm.
+    """
+    bestVal = -math.inf
+    bestMove = (-1, -1)
+
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == '-':
+                board[i][j] = 'X'
+                moveVal = minimax(board, 0, False)
+                board[i][j] = '-'
+                if moveVal > bestVal:
+                    bestMove = (i, j)
+                    bestVal = moveVal
+
+    return bestMove
+
+def printBoard(board):
+    for row in board:
+        print(" ".join(row))
+
+def main():
+    board = [['-' for _ in range(3)] for _ in range(3)]
+
+    print("Welcome to Tic-Tac-Toe!")
+    printBoard(board)
+
+    while True:
+        player_row, player_col = map(int, input("Enter your move (row col): ").split())
+        if board[player_row][player_col] != '-':
+            print("Invalid move. Try again.")
+            continue
+        board[player_row][player_col] = 'O'
+        printBoard(board)
+
+        score = evaluate(board)
+        if score == -1:
+            print("You win!")
+            break
+        elif score == 0:
+            print("It's a tie!")
+            break
+
+        print("Computer is thinking...")
+        comp_row, comp_col = findBestMove(board)
+        board[comp_row][comp_col] = 'X'
+        printBoard(board)
+
+        score = evaluate(board)
+        if score == 1:
+            print("Computer wins!")
+            break
+        elif score == 0:
+            print("It's a tie!")
+            break
+
+if __name__ == "__main__":
+    main()
+output :
+Welcome to Tic-Tac-Toe!
+- - -
+- - -
+- - -
+Enter your move (row col): 1 1
+- - -
+- O -
+- - -
+Computer is thinking...
+X - -
+- O -
+- - -
+Enter your move (row col): 2 1
+X - -
+- O -
+- O -
+Computer is thinking...
+X X -
+- O -
+- O -
+Enter your move (row col): 1 2
+X X -
+- O O
+- O -
+Computer is thinking...
+X X X
+- O O
+- O -
+Computer wins!
